@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    .container{
+      margin-top: 50px;
+      color: #6C6;
+    }
+    .hexagon {
+      font-size: 135px;
+      margin: 0px;
+      padding: 0px;
+    }
+    .honeycomb {
+      margin: 0px;
+      margin-top: -88px;
+      letter-spacing: -21px;
+    }
+
+    .honeycomb2 {
+      margin-top: -115px;
+      margin-left: 51px;
+      letter-spacing: -21px;
+    }
+
+    .honeycomb3 {
+      margin-top: -115px;
+      letter-spacing: -21px;
+    }
+  </style>
+  <script>
+  function myFunction() {
+    const GESSO = "#D7D4CD"
+    const CANAPA = "#C8C5BF"
+    const CACAO = "#79716F"
+    const CENERE = "#C6C6C6"
+    const LAVAGNA = "#7F8386"
+    const colors = [GESSO,CANAPA,CACAO,CENERE,LAVAGNA]
+
+    let rowNumber = 0
+
+    $(".hexagon").each(function() {
+      const text = $(this).text();
+      $(this).text("")
+      for (var i = 0; i < text.length; i++) {
+        const character = text.charAt(i)
+
+        const currentColor = colors[Math.floor(Math.random()*colors.length)]
+
+        const element= $("<span></span>")
+                        .text(character)
+                        .attr("id","tile-"+rowNumber+"-"+i)
+                        .css('color',currentColor)
+        $(this).append(element)
+
+      }
+      rowNumber++
+    })
+  }
+  </script>
+</head>
+<body onload="myFunction()">
+  <div class="container">
+    <div class="honeycomb">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb2">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb3">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb2">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb3">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb2">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+    <div class="honeycomb3">
+      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+    </div>
+  <div>
+</body>
+</html>
