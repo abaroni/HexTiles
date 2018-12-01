@@ -30,6 +30,24 @@
     .modal-body{
       padding-top: 40px;
     }
+    .modal-body .hexrow>span {
+        display: grid;
+        grid-template-columns: 10px 85px 85px 85px 85px 85px;
+        height: 85px;
+        line-height: 65px;
+    }
+    .modal-body .hexrowEven>span {
+        display: grid;
+        grid-template-columns: 50px 85px 85px 85px 85px 85px;
+        height: 85px;
+        line-height: 65px;
+    }
+    .modal-body .hexrow {
+        margin-top: 0px;
+    }
+    .modal-body .hexrowEven {
+        margin-left: 0px;
+    }
     .hexrow{
       font-size: 94px;
       margin-top: -78px;
@@ -83,9 +101,7 @@
 
       let tileId = 0
       $("span[data-original='true']").each(function() {
-        let columnNumber = 0
         const generateElement = () => $("<span></span>")
-                                      .attr("columnNumber",columnNumber++)
                                       .attr("data-color",tileId)
                                       .text("⬢")
         for(let i=1; i<=COLUMNS; i++){
@@ -95,7 +111,7 @@
       })
       multiplyColumns()
       multiplyColumns()
-      multiplyRows()
+      addTemplateListners()
       colorize()
     }
 
@@ -103,7 +119,6 @@
       $(".hexrow").each(function() {
         const clonedSpan = $(this).children("span[data-original='true']").clone().attr("data-original",false)
         $(this).append(clonedSpan)
-        $(this).append(clonedSpan.clone())
       })
     }
     function multiplyRows(){
@@ -123,6 +138,27 @@
       $(this).css("color",colorsArray[thisColor])
       })
     }
+
+    let source = null
+    function addTemplateListners(){
+      $("*[data-template='true']").click(function() {
+        if(!source){
+          source = $(this)
+          source.text("⬡")
+        }else{
+          const sourceDataColor = source.attr("data-color")
+          const destinationDataColor = $(this).attr("data-color")
+          const sourceColor = colorsArray[sourceDataColor]
+          colorsArray[sourceDataColor] = colorsArray[destinationDataColor]
+          colorsArray[destinationDataColor] = sourceColor
+          source.text("⬢")
+          source = null
+          drawColors()
+        }
+
+      })
+    }
+
   </script>
 </head>
 <body onload="init()">
@@ -147,14 +183,14 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="changePatternModalLabel">Change pattern</h5>
+          <h5 class="modal-title" id="changePatternModalLabel">Click to switch</h5>
         </div>
         <div class="modal-body">
           <div data-original="false " class="wrapper">
-            <div class="hexrow hexrowOdd"><span data-original="false"><span columnnumber="0" data-color="0" style="color: var(--GESSO);">⬢</span><span columnnumber="1" data-color="1" style="color: var(--CANAPA);">⬢</span><span columnnumber="2" data-color="2" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="3" data-color="3" style="color: var(--CACAO);">⬢</span><span columnnumber="4" data-color="4" style="color: var(--CENERE);">⬢</span></span></div>
-            <div class="hexrow hexrowEven"><span data-original="false"><span columnnumber="0" data-color="5" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="6" style="color: var(--GESSO);">⬢</span><span columnnumber="2" data-color="7" style="color: var(--CENERE);">⬢</span><span columnnumber="3" data-color="8" style="color: var(--CACAO);">⬢</span><span columnnumber="4" data-color="9" style="color: var(--CENERE);">⬢</span></span></div>
-            <div class="hexrow hexrowOdd"><span data-original="false"><span columnnumber="0" data-color="10" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="11" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="2" data-color="12" style="color: var(--CENERE);">⬢</span><span columnnumber="3" data-color="13" style="color: var(--GESSO);">⬢</span><span columnnumber="4" data-color="14" style="color: var(--GESSO);">⬢</span></span></div>
-            <div class="hexrow hexrowEven"><span data-original="false"><span columnnumber="0" data-color="15" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="16" style="color: var(--CACAO);">⬢</span><span columnnumber="2" data-color="17" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="3" data-color="18" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="4" data-color="19" style="color: var(--CACAO);">⬢</span></span></div>
+            <div class="hexrow hexrowOdd"><span data-original="false"><span></span><span data-template="true" data-color="0" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="1" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="2" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="3" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="4" style="color: var(--CENERE);">⬢</span></span></div>
+            <div class="hexrow hexrowEven"><span data-original="false"><span></span><span data-template="true" data-color="5" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="6" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="7" style="color: var(--CENERE);">⬢</span><span data-template="true" data-color="8" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="9" style="color: var(--CENERE);">⬢</span></span></div>
+            <div class="hexrow hexrowOdd"><span data-original="false"><span></span><span data-template="true" data-color="10" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="11" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="12" style="color: var(--CENERE);">⬢</span><span data-template="true" data-color="13" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="14" style="color: var(--GESSO);">⬢</span></span></div>
+            <div class="hexrow hexrowEven"><span data-original="false"><span></span><span data-template="true" data-color="15" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="16" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="17" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="18" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="19" style="color: var(--CACAO);">⬢</span></span></div>
           </div>
         </div>
         <div class="modal-footer">
