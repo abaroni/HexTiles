@@ -1,187 +1,168 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <style>
-  :root {
-    --GESSO: #D7D4CD;
-    --CANAPA: #C8C5BF;
-    --CACAO: #79716F;
-    --CENERE: #C6C6C6;
-    --LAVAGNA: #7F8386;
-  }
-
-    .container{
-     user-select: none;
-      margin-top: 50px;
-      color: #6C6;
+    .controls{
+      padding-top: 20px;
+      padding-bottom: 50px;
+      margin-left: 36px;
     }
-    .hexagon {
-      font-size: 135px;
-      margin: 0px;
-      padding: 0px;
+    * {
+          -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+             -khtml-user-select: none; /* Konqueror HTML */
+               -moz-user-select: none; /* Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none; /* Non-prefixed version, currently
+                                          supported by Chrome and Opera */
+        }
+    :root {
+      --GESSO: #D7D4CD;
+      --CANAPA: #C8C5BF;
+      --CACAO: #79716F;
+      --CENERE: #C6C6C6;
+      --LAVAGNA: #7F8386;
     }
-    .honeycomb {
-      margin: 0px;
-      margin-top: -88px;
-      letter-spacing: -21px;
+    .modal-body{
+      padding-top: 40px;
     }
-
-    .honeycomb2 {
-      margin-top: -115px;
-      margin-left: 51px;
-      letter-spacing: -21px;
+    .hexrow{
+      font-size: 94px;
+      margin-top: -78px;
+      letter-spacing: -13px;
     }
-
-    .honeycomb3 {
-      margin-top: -115px;
-      letter-spacing: -21px;
+    .hexrowEven{
+        margin-left: 36px;
+    }
+    .hexrowOdd{
     }
   </style>
   <script>
-  const GESSO = "var(--GESSO)"
-  const CANAPA = "var(--CANAPA)"
-  const CACAO = "var(--CACAO)"
-  const CENERE = "var(--CENERE)"
-  const LAVAGNA = "var(--LAVAGNA)"
-  const COLORS = [GESSO,CANAPA,CACAO,CENERE,LAVAGNA]
+    const COLUMNS = 5
+    const ROWS = 4
 
-
-  function setIdentifiers() {
-
-    let rowNumber = 0
-    $(".hexagon").each(function() {
-      const text = $(this).text();
-      $(this).text("")
-      //creating unique span with ids
-      for (var i = 0; i < text.length; i++) {
-        const character = text.charAt(i)
-
-        const currentId = "tile-"+rowNumber+"-"+i
-
-        const element= $("<span></span>")
-                        .text(character)
-                        .attr("id",currentId)
-                        .attr("data-color",COLORS[0])
-                        .addClass("tile")
-
-        $(this).append(element)
-
-      }
-      rowNumber++
-    })
-    colorize()
-  }
-
-  const getTile = function(row,column) {
-    return $("#tile-"+row+"-"+column)
-  }
-  const getCoordinates = function(elem){
-    //getCoordinates is horribly linked to "tile" length
-    const array = elem.attr('id').substring(5).split("-")
-    const row = parseInt(array[0])
-    const column = parseInt(array[1])
-    return [row,column]
-  }
-
-  const randomColor = function(){
-    return randomColorFromSet(COLORS)
-  }
-  const randomColorFromSet = function(set){
-    if (set.length == 0){
-      console.error("randomColorFromSet for empty set - setting random color")
-      return randomColor()
+    const GESSO = "var(--GESSO)"
+    const CANAPA = "var(--CANAPA)"
+    const CACAO = "var(--CACAO)"
+    const CENERE = "var(--CENERE)"
+    const LAVAGNA = "var(--LAVAGNA)"
+    const COLORS = [GESSO,CANAPA,CACAO,CENERE,LAVAGNA]
+    /***********************/
+    const randomColor = function(){
+      return randomColorFromSet(COLORS)
     }
-    return set[Math.floor(Math.random()*set.length)]
-  }
-
-  const arrayDiff = (A,B) => A.filter(function(x) { return B.indexOf(x) < 0 })
-
-  function getNeighborsElement(element){
-    const row = getCoordinates(element)[0]
-    const column = getCoordinates(element)[1]
-    return getNeighbors(row,column)
-  }
-  function getNeighbors(row,column){
-    const neighbors = []
-    const root = getTile(row,column)
-    if (root.length){
-      neighbors.push( getTile(row,column-1) )
-      neighbors.push( getTile(row,column+1) )
-      if(row % 2){
-        // odd row number
-        //
-        neighbors.push( getTile(row-1,column) )
-        neighbors.push( getTile(row-1,column+1) )
-        neighbors.push( getTile(row+1,column) )
-        neighbors.push( getTile(row+1,column+1) )
-      }else{
-        // even row number
-        //
-        neighbors.push( getTile(row-1,column) )
-        neighbors.push( getTile(row-1,column-1) )
-        neighbors.push( getTile(row+1,column) )
-        neighbors.push( getTile(row+1,column-1) )
-
+    const randomColorFromSet = function(set){
+      if (set.length == 0){
+        console.error("randomColorFromSet for empty set - setting random color")
+        return randomColor()
       }
+      return set[Math.floor(Math.random()*set.length)]
     }
-    //avoid returnin not existing element
-    return neighbors.filter (elem => elem.length)
-  }
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      return array;
+    }
+    /***********************/
+    const colorsArray = [GESSO,CANAPA,CACAO,CENERE,LAVAGNA,GESSO,CANAPA,CACAO,CENERE,LAVAGNA,GESSO,CANAPA,CACAO,CENERE,LAVAGNA,GESSO,CANAPA,CACAO,CENERE,LAVAGNA]
 
-  function getColors(set){
-    let colors = []
-    set.forEach( function(e){
-      const thisColor = e.attr('data-color')
-      if($.inArray(thisColor, colors) === -1)
-        colors.push(thisColor)
-    })
-    return colors
-  }
-  
-  function colorize(){
+    function init(){
 
-      $(".tile").each(function() {
-        const currentElement = $(this)
-        const neighbors = getNeighborsElement(currentElement)
-        const noGoodColors = getColors(neighbors)
-        const possibleColors = arrayDiff(COLORS,noGoodColors)
-
-        const actualColor = randomColorFromSet(possibleColors)
-        $(this).attr('data-color',actualColor)
-        $(this).css('color',actualColor)
-
+      let tileId = 0
+      $("span[data-original='true']").each(function() {
+        let columnNumber = 0
+        const generateElement = () => $("<span></span>")
+                                      .attr("columnNumber",columnNumber++)
+                                      .attr("data-color",tileId)
+                                      .text("⬢")
+        for(let i=1; i<=COLUMNS; i++){
+          $(this).append(generateElement())
+          tileId++
+        }
       })
+      multiplyColumns()
+      multiplyColumns()
+      multiplyRows()
+      colorize()
+    }
 
-  }
-  function rethink(){
-    colorize()
-  }
+    function multiplyColumns(){
+      $(".hexrow").each(function() {
+        const clonedSpan = $(this).children("span[data-original='true']").clone().attr("data-original",false)
+        $(this).append(clonedSpan)
+        $(this).append(clonedSpan.clone())
+      })
+    }
+    function multiplyRows(){
+      $("div.wrapper[data-original='true']").each(function() {
+        const rows = $(this).clone().attr("data-original",false)
+        rows.find("*[data-original='true']").attr("data-original",false)
+        $("body").append(rows)
+      })
+    }
+    function colorize(){
+      shuffle(colorsArray)
+      drawColors()
+    }
+    function drawColors(){
+      $("*[data-color]").each(function() {
+      const thisColor = $(this).attr("data-color")
+      $(this).css("color",colorsArray[thisColor])
+      })
+    }
   </script>
 </head>
-<body onload="setIdentifiers()" onclick="rethink()">
-  <div class="container">
-    <div class="honeycomb">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
+<body onload="init()">
+  <div class="controls">
+    <button type="button" class="btn btn-light" onclick="colorize()">Randomize</button>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#changePatternModal">
+      Change pattern
+    </button>
+
+  </div>
+  <div data-original="true" class="wrapper">
+    <div class="hexrow hexrowOdd"><span data-original="true"></span></div>
+    <div class="hexrow hexrowEven"><span data-original="true"></span></div>
+    <div class="hexrow hexrowOdd"><span data-original="true"></span></div>
+    <div class="hexrow hexrowEven"><span data-original="true"></span></div>
+  </div>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="changePatternModal" tabindex="-1" role="dialog" aria-labelledby="changePatternModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePatternModalLabel">Change pattern</h5>
+        </div>
+        <div class="modal-body">
+          <div data-original="false " class="wrapper">
+            <div class="hexrow hexrowOdd"><span data-original="false"><span columnnumber="0" data-color="0" style="color: var(--GESSO);">⬢</span><span columnnumber="1" data-color="1" style="color: var(--CANAPA);">⬢</span><span columnnumber="2" data-color="2" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="3" data-color="3" style="color: var(--CACAO);">⬢</span><span columnnumber="4" data-color="4" style="color: var(--CENERE);">⬢</span></span></div>
+            <div class="hexrow hexrowEven"><span data-original="false"><span columnnumber="0" data-color="5" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="6" style="color: var(--GESSO);">⬢</span><span columnnumber="2" data-color="7" style="color: var(--CENERE);">⬢</span><span columnnumber="3" data-color="8" style="color: var(--CACAO);">⬢</span><span columnnumber="4" data-color="9" style="color: var(--CENERE);">⬢</span></span></div>
+            <div class="hexrow hexrowOdd"><span data-original="false"><span columnnumber="0" data-color="10" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="11" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="2" data-color="12" style="color: var(--CENERE);">⬢</span><span columnnumber="3" data-color="13" style="color: var(--GESSO);">⬢</span><span columnnumber="4" data-color="14" style="color: var(--GESSO);">⬢</span></span></div>
+            <div class="hexrow hexrowEven"><span data-original="false"><span columnnumber="0" data-color="15" style="color: var(--CANAPA);">⬢</span><span columnnumber="1" data-color="16" style="color: var(--CACAO);">⬢</span><span columnnumber="2" data-color="17" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="3" data-color="18" style="color: var(--LAVAGNA);">⬢</span><span columnnumber="4" data-color="19" style="color: var(--CACAO);">⬢</span></span></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
-    <div class="honeycomb2">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-    <div class="honeycomb3">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-    <div class="honeycomb2">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-    <div class="honeycomb3">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-    <div class="honeycomb2">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-    <div class="honeycomb3">
-      <span class="hexagon">&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;&#x2B22;</span>
-    </div>
-  <div>
+  </div>
+
 </body>
 </html>
