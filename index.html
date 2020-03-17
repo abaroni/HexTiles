@@ -1,208 +1,406 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  <style>
-    .controls{
-      padding-top: 20px;
-      padding-bottom: 50px;
-      margin-left: 36px;
-    }
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    * {
-      -webkit-touch-callout: none; /* iOS Safari */
-      -webkit-user-select: none; /* Safari */
-      -khtml-user-select: none; /* Konqueror HTML */
-      -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer/Edge */
-      user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
-    }
-    :root {
-      --GESSO: #D7D4CD;
-      --CANAPA: #C8C5BF;
-      --CACAO: #79716F;
-      --CENERE: #C6C6C6;
-      --LAVAGNA: #7F8386;
-    }
-    .modal-body{
-      padding-top: 40px;
-    }
-    .modal-body .hexrow>span {
-        display: grid;
-        grid-template-columns: 10px 85px 85px 85px 85px 85px;
-        height: 85px;
-        line-height: 65px;
-    }
-    .modal-body .hexrowEven>span {
-        display: grid;
-        grid-template-columns: 50px 85px 85px 85px 85px 85px;
-        height: 85px;
-        line-height: 65px;
-    }
-    .modal-body .hexrow {
-        margin-top: 0px;
-    }
-    .modal-body .hexrowEven {
-        margin-left: 0px;
-    }
-    .hexrow{
-      font-size: 94px;
-      margin-top: -78px;
-      letter-spacing: -13px;
-    }
-    .hexrowEven{
-        margin-left: 36px;
-    }
-    .hexrowOdd{
-    }
-  </style>
-  <script>
-    const COLUMNS = 5
-    const ROWS = 4
+  <title>COVID-19</title>
+  <meta content="" name="descriptison">
+  <meta content="" name="keywords">
 
-    const COLORCODE = {
-      GESSO: "var(--GESSO)",
-      CANAPA: "var(--CANAPA)",
-      CACAO: "var(--CACAO)",
-      CENERE: "var(--CENERE)",
-      LAVAGNA: "var(--LAVAGNA)"
-    }
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-    const COLORS = ["GESSO","CANAPA","CACAO","CENERE","LAVAGNA"]
-    /***********************/
-    function shuffle(array) {
-      var currentIndex = array.length, temporaryValue, randomIndex;
-      // While there remain elements to shuffle...
-      while (0 !== currentIndex) {
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-      }
-      return array;
-    }
-    function queryString(key) {
-        key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
-        var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
-        return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-    }
-    /***********************/
-    let colorsArray = COLORS.concat(COLORS).concat(COLORS).concat(COLORS)
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
-    function init(){
-      if (queryString("colorsArray")){
-        const newColorsArray = queryString("colorsArray").split(",")
-        if (newColorsArray.length == colorsArray.length) colorsArray = newColorsArray
-      }
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
 
-      let tileId = 0
-      $("span[data-original='true']").each(function() {
-        const generateElement = () => $("<span></span>")
-                                      .attr("data-color",tileId)
-                                      .text("⬢")
-        for(let i=1; i<=COLUMNS; i++){
-          $(this).append(generateElement())
-          tileId++
-        }
-      })
-      multiplyColumns()
-      multiplyColumns()
-      addTemplateListners()
-      drawColors()
-    }
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
 
-    function multiplyColumns(){
-      $(".hexrow").each(function() {
-        const clonedSpan = $(this).children("span[data-original='true']").clone().attr("data-original",false)
-        $(this).append(clonedSpan)
-      })
-    }
-    function multiplyRows(){
-      $("div.wrapper[data-original='true']").each(function() {
-        const rows = $(this).clone().attr("data-original",false)
-        rows.find("*[data-original='true']").attr("data-original",false)
-        $("body").append(rows)
-      })
-    }
-    function shuffleAndDraw(){
-      shuffle(colorsArray)
-      drawColors()
-    }
-    function drawColors(){
-      $("*[data-color]").each(function() {
-      const thisColor = $(this).attr("data-color")
-      $(this).css("color",COLORCODE[colorsArray[thisColor]])
-      $("#shareButton").attr("href",`https://wa.me/?text=https://abaroni.github.io?colorsArray=${colorsArray}`)
-      })
-    }
-
-    let source = null
-    function addTemplateListners(){
-      $("*[data-template='true']").click(function() {
-        if(!source){
-          source = $(this)
-          source.text("⬡")
-        }else{
-          const sourceDataColor = source.attr("data-color")
-          const destinationDataColor = $(this).attr("data-color")
-          const sourceColor = colorsArray[sourceDataColor]
-          colorsArray[sourceDataColor] = colorsArray[destinationDataColor]
-          colorsArray[destinationDataColor] = sourceColor
-          source.text("⬢")
-          source = null
-          drawColors()
-        }
-
-      })
-    }
-
-  </script>
+  <!-- =======================================================
+  * Template Name: Bocor - v2.0.0
+  * Template URL: https://bootstrapmade.com/bocor-bootstrap-template-nice-animation/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
 </head>
-<body onload="init()">
-  <div class="controls">
-    <button type="button" class="btn btn-light" onclick="shuffleAndDraw()">Randomize</button>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#changePatternModal">
-      Change pattern
-    </button>
-    <a id="shareButton" class="btn btn-light">Share via Whatsapp</a>
 
-  </div>
-  <div data-original="true" class="wrapper">
-    <div class="hexrow hexrowOdd"><span data-original="true"></span></div>
-    <div class="hexrow hexrowEven"><span data-original="true"></span></div>
-    <div class="hexrow hexrowOdd"><span data-original="true"></span></div>
-    <div class="hexrow hexrowEven"><span data-original="true"></span></div>
-  </div>
+<body>
 
+  <!-- ======= Header ======= -->
+  <header id="header">
+    <div class="container d-flex">
 
-  <!-- Modal -->
-  <div class="modal fade" id="changePatternModal" tabindex="-1" role="dialog" aria-labelledby="changePatternModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="changePatternModalLabel">Click to switch</h5>
-        </div>
-        <div class="modal-body">
-          <div data-original="false " class="wrapper">
-            <div class="hexrow hexrowOdd"><span data-original="false"><span></span><span data-template="true" data-color="0" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="1" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="2" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="3" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="4" style="color: var(--CENERE);">⬢</span></span></div>
-            <div class="hexrow hexrowEven"><span data-original="false"><span></span><span data-template="true" data-color="5" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="6" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="7" style="color: var(--CENERE);">⬢</span><span data-template="true" data-color="8" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="9" style="color: var(--CENERE);">⬢</span></span></div>
-            <div class="hexrow hexrowOdd"><span data-original="false"><span></span><span data-template="true" data-color="10" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="11" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="12" style="color: var(--CENERE);">⬢</span><span data-template="true" data-color="13" style="color: var(--GESSO);">⬢</span><span data-template="true" data-color="14" style="color: var(--GESSO);">⬢</span></span></div>
-            <div class="hexrow hexrowEven"><span data-original="false"><span></span><span data-template="true" data-color="15" style="color: var(--CANAPA);">⬢</span><span data-template="true" data-color="16" style="color: var(--CACAO);">⬢</span><span data-template="true" data-color="17" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="18" style="color: var(--LAVAGNA);">⬢</span><span data-template="true" data-color="19" style="color: var(--CACAO);">⬢</span></span></div>
+      <div class="logo mr-auto">
+        <h1 class="text-light"><a href="index.html">COVID<span>-</span>19</a></h1>
+        <!-- Uncomment below if you prefer to use an image logo -->
+        <!-- <a href="index.html"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+      </div>
+
+      <nav class="nav-menu d-none d-lg-block">
+        <ul>
+          <li class="active"><a href="#header">Home</a></li>
+          <!--  <li class="get-started"><a href="#about">Get Started</a></li>-->
+          <!--
+          <li><a href="#services">Services</a></li>
+          <li><a href="#portfolio">Portfolio</a></li>
+          <li><a href="#team">Team</a></li>
+          <li class="drop-down"><a href="">Drop Down</a>
+            <ul>
+              <li><a href="#">Drop Down 1</a></li>
+              <li class="drop-down"><a href="#">Drop Down 2</a>
+                <ul>
+                  <li><a href="#">Deep Drop Down 1</a></li>
+                  <li><a href="#">Deep Drop Down 2</a></li>
+                  <li><a href="#">Deep Drop Down 3</a></li>
+                  <li><a href="#">Deep Drop Down 4</a></li>
+                  <li><a href="#">Deep Drop Down 5</a></li>
+                </ul>
+              </li>
+              <li><a href="#">Drop Down 3</a></li>
+              <li><a href="#">Drop Down 4</a></li>
+              <li><a href="#">Drop Down 5</a></li>
+            </ul>
+          </li>
+
+          -->
+          <li><a href="#contact">Contact Me</a></li>
+        </ul>
+      </nav><!-- .nav-menu -->
+
+    </div>
+  </header><!-- End Header -->
+
+  <!-- ======= Hero Section ======= -->
+  <section id="hero">
+
+    <div class="container">
+      <div class="row d-flex align-items-center">
+      <div class=" col-lg-6 py-5 py-lg-0 order-2 order-lg-1" data-aos="fade-right">
+        <h1>Warning</h1>
+        <h2>This is not a forecast of how COVID-19 will impact italy. I'm just a kid with some javascript and governament data, not taking into account a lot of things. Please do not share on social media without this warning.</h2>
+        <a href="#about" class="btn-get-started scrollto">I understand</a>
+      </div>
+      <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="fade-left">
+          <h1>Read the warning</h1>
+      </div>
+    </div>
+    </div>
+
+  </section><!-- End Hero -->
+
+  <main id="main">
+
+    <!-- ======= About Section ======= -->
+    <section id="about" class="about section-bg">
+      <div class="container">
+
+        <div class="row">
+          <div class="col-xl-12 pl-0 pl-lg-5 pr-lg-1 d-flex align-items-stretch">
+            <div class="content d-flex flex-column justify-content-center">
+              <h3 data-aos="fade-in" data-aos-delay="50">Latest data from: <span id="latest-date"></span></h3>
+              <div class="row">
+                <div class="col-md-6 icon-box" data-aos="fade-up">
+                  <i class="bx bx-receipt"></i>
+                  <h4>Today's numbers</h4>
+                  <p data-aos="fade-in">Reported COVID-19 cases in Italy:</p>
+                  <p data-aos="fade-in">Total <span id="total-number"></span></p>
+                  <p data-aos="fade-in">Positive <span id="positive-number"></span></p>
+                  <p data-aos="fade-in">Death <span id="dead-number"></span></p>
+                  <p data-aos="fade-in">Cured <span id="cured-number"></span></p>
+                </div>
+                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="50">
+                  <i class="bx bx-images"></i>
+                  <h4><a href="#">Charted data up to today</a></h4>
+                  <div class="today-chart-container">
+                  </div>
+                </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Fitting equations to the data of total cases</h4>
+                  <p>Linear: y = 1199.3427442123095x + -5922.896103896105 , r^2 = 0.8412082535409161</p>
+                  <p>Power: y = 80.07637574860617x^1.728136280128634 , r^2 = 0.7976393115797835</p>
+                  <p>Exponential: y = 455.56983838327466e^(0.1914892651357751x) , r^2 = 0.9919108426183154</p>
+                </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Data and equations on a chart</h4>
+                  <div class="data-equations-chart-container">
+                  </div>
+                </div>
+
+              </div>
+            </div><!-- End .content-->
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+      </div>
+    </section><!-- End About Section -->
+
+
+    <!-- ======= Contact Section ======= -->
+    <section id="contact" class="contact section-bg">
+      <div class="container">
+
+        <div class="section-title">
+          <h2 data-aos="fade-in">Contact</h2>
+          <p data-aos="fade-in">I'm Alessandro Baroni, you can reach me to the following contacts</p>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="info-box" data-aos="fade-up">
+              <i class="bx bx-map"></i>
+              <h3>My address</h3>
+              <p>Somewhere in Rome</p>
+            </div>
+          </div>
+          <div class="col-lg-12">
+
+            <div class="row">
+
+              <div class="col-md-6">
+                <div class="info-box mt-4" data-aos="fade-up" data-aos-delay="50">
+                  <i class="bx bx-envelope"></i>
+                  <h3>Email Me</h3>
+                  <p>inf.baroni@gmail.com</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-box mt-4" data-aos="fade-up" data-aos-delay="50">
+                  <i class="bx bxl-twitter"></i>
+                  <h3>Tweet me</h3>
+                  <p>@tm86</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+    </section><!-- End Contact Section -->
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+
+    <div class="footer-top">
+
+      <div class="container" data-aos="fade-up">
+
+        <div class="row  justify-content-center">
+          <div class="col-lg-6">
+            <h3>COVID-19</h3>
+            <p>This page has been created to keep me busy while staying at home. It is not an accurate forecast in any way, so don't use it to take any businsess or public interest decision</p>
+          </div>
+        </div>
+
+
+        <div class="social-links">
+          <a href="https://twitter.com/tm86" class="twitter"><i class="bx bxl-twitter"></i></a>
+          <a href="https://it.linkedin.com/in/alebaroni" class="linkedin"><i class="bx bxl-linkedin"></i></a>
         </div>
       </div>
     </div>
-  </div>
 
+    <div class="container footer-bottom clearfix">
+      <div class="copyright">
+
+      </div>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/bocor-bootstrap-template-nice-animation/ -->
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/venobox/venobox.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" integrity="sha256-8zyeSXm+yTvzUN1VgAOinFgaVFEFTyYzWShOy9w7WoQ=" crossorigin="anonymous"></script>
+  <script>
+		window.onload = function() {
+			const todayContainer = document.querySelector('.today-chart-container');
+			const todayDiv = document.createElement('div');
+			todayDiv.classList.add('chart-container');
+			const todayCanvas = document.createElement('canvas');
+			todayDiv.appendChild(todayCanvas);
+			todayContainer.appendChild(todayDiv);
+
+			const dataEquationsContainer = document.querySelector('.data-equations-chart-container');
+			const dataEquationsDiv = document.createElement('div');
+			dataEquationsDiv.classList.add('chart-container');
+			const dataEquationsCanvas = document.createElement('canvas');
+			dataEquationsDiv.appendChild(dataEquationsCanvas);
+			dataEquationsContainer.appendChild(dataEquationsDiv);
+
+      function getLabels(data){return  data.map( (e,i) => 'Day '+(i+1) )}
+      const outputObject = {
+        latestDate: '2020-03-16',
+        total: [
+            229,   322,   400,   650,
+            888,  1128,  1694,  2036,
+           2502,  3089,  3858,  4636,
+           5883,  7375,  9172, 10149,
+          12462, 15113, 17660, 21157,
+          24747, 27980
+        ],
+        dead: [
+             7,   10,   12,   17,   21,
+            29,   34,   52,   79,  107,
+           148,  197,  233,  366,  463,
+           631,  827, 1016, 1266, 1441,
+          1809, 2158
+        ],
+        cured: [
+             1,    1,    3,   45,   46,
+            50,   83,  149,  160,  276,
+           414,  523,  589,  622,  724,
+          1004, 1045, 1258, 1439, 1966,
+          2335, 2749
+        ],
+        positive: [
+            221,   311,   385,   588,
+            821,  1049,  1577,  1835,
+           2263,  2706,  3296,  3916,
+           5061,  6387,  7985,  8514,
+          10590, 12839, 14955, 17750,
+          20603, 23073
+        ],
+        totalForcastedLinear: [
+          -5922, -4723, -3524, -2324, -1125,
+             73,  1273,  2472,  3671,  4871,
+           6070,  7269,  8469,  9668, 10867,
+          12067, 13266, 14465, 15665, 16864,
+          18063, 19263, 20462, 21661, 22861,
+          24060, 25260, 26459, 27658
+        ],
+        totalForcastedPower: [
+              0,    80,   265,   534,   878,
+           1292,  1771,  2311,  2911,  3569,
+           4281,  5048,  5867,  6738,  7658,
+           8628,  9646, 10712, 11824, 12982,
+          14186, 15434, 16726, 18061, 19440,
+          20861, 22323, 23828, 25374
+        ],
+        totalForcastedExponential: [
+            455,   551,   668,   809,   979,
+           1186,  1437,  1740,  2107,  2552,
+           3091,  3744,  4534,  5491,  6650,
+           8053,  9753, 11811, 14304, 17323,
+          20980, 25408, 30770, 37264, 45129,
+          54654, 66189, 80158, 97075
+        ]
+      }
+      function last(array) {
+          return array[array.length - 1];
+      }
+      document.querySelector('#latest-date').textContent= outputObject.latestDate
+
+      document.querySelector('#total-number').textContent= last(outputObject.total)
+      document.querySelector('#dead-number').textContent= last(outputObject.dead)
+      document.querySelector('#cured-number').textContent= last(outputObject.cured)
+      document.querySelector('#positive-number').textContent= last(outputObject.positive)
+
+			const data = outputObject.total
+			const linear = outputObject.totalForcastedLinear
+			const power = outputObject.totalForcastedPower
+			const exponential = outputObject.totalForcastedExponential
+      function drawToday(){
+        const ctx = todayCanvas.getContext('2d');
+  			const options = {
+  				type: 'line',
+  				data: {
+  					labels: getLabels(data),
+  					datasets: [{
+  						label: 'Total',
+  						data: data,
+  						borderColor: 'rgb(255, 100, 100)',
+  						fill: false,
+              showLine: false
+  					}]
+  				},
+  				options: {
+  					responsive: true
+  				}
+  			};
+  			new Chart(ctx, options);
+      }
+      function drawDataEquations(){
+        const ctx = dataEquationsCanvas.getContext('2d');
+  			const options = {
+  				type: 'line',
+  				data: {
+  					labels: getLabels(exponential),
+  					datasets: [
+              {
+  						label: 'Total',
+  						data: data,
+  						borderColor: 'rgba(0, 0, 0,0.8)',
+  						fill: false,
+              showLine: false
+  					},
+            {
+  						label: 'Linear',
+  						data: linear,
+  						borderColor: 'rgba(80, 80, 150,0.5)',
+  						fill: false,
+              showLine: true,
+              pointRadius: 1
+  					},
+            {
+  						label: 'Power',
+  						data: power,
+  						borderColor: 'rgba(80, 150, 80,0.5)',
+  						fill: false,
+              showLine: true,
+              pointRadius: 1
+  					},
+            {
+  						label: 'Exponential',
+  						data: exponential,
+  						borderColor: 'rgba(150, 80, 80,0.5)',
+  						fill: false,
+              showLine: true,
+              pointRadius: 1
+  					}]
+  				},
+  				options: {
+  					responsive: true
+  				}
+  			};
+  			new Chart(ctx, options);
+      }
+      drawToday()
+      drawDataEquations()
+		};
+	</script>
 </body>
+
 </html>
