@@ -139,7 +139,14 @@
                 </div>
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
-                  <h4>Restricting to last 7 days</h4>
+                  <h4>Fitting equations (restricting to last 7 days)</h4>
+                  <p>Linear: <span id="restricted-linear-equation"></span> , r^2 = <span id="restricted-linear-r2"></span></p>
+                  <p>Power: <span id="restricted-power-equation"></span> , r^2 = <span id="restricted-power-r2"></span></p>
+                  <p>Exponential: <span id="restricted-exponential-equation"></span> , r^2 = <span id="restricted-exponential-r2"></span></p>
+                </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Data and equations on a chart (restricting to last 7 days)</h4>
                   <div class="data-equations-restricted-chart-container">
                   </div>
                 </div>
@@ -275,130 +282,352 @@
 
       function getLabels(data){return  data.map( (e,i) => 'Day '+(i+1) )}
       const allTimeData = {
-        latestDate: '2020-03-17',
-        total: [
-            229,   322,   400,   650,
-            888,  1128,  1694,  2036,
-           2502,  3089,  3858,  4636,
-           5883,  7375,  9172, 10149,
-          12462, 15113, 17660, 21157,
-          24747, 27980, 31506
+        "latestDate": "2020-03-17",
+        "total": [
+          229,
+          322,
+          400,
+          650,
+          888,
+          1128,
+          1694,
+          2036,
+          2502,
+          3089,
+          3858,
+          4636,
+          5883,
+          7375,
+          9172,
+          10149,
+          12462,
+          15113,
+          17660,
+          21157,
+          24747,
+          27980,
+          31506
         ],
-        dead: [
-             7,   10,   12,   17,   21,
-            29,   34,   52,   79,  107,
-           148,  197,  233,  366,  463,
-           631,  827, 1016, 1266, 1441,
-          1809, 2158, 2503
+        "dead": [
+          7,
+          10,
+          12,
+          17,
+          21,
+          29,
+          34,
+          52,
+          79,
+          107,
+          148,
+          197,
+          233,
+          366,
+          463,
+          631,
+          827,
+          1016,
+          1266,
+          1441,
+          1809,
+          2158,
+          2503
         ],
-        cured: [
-             1,    1,    3,   45,   46,
-            50,   83,  149,  160,  276,
-           414,  523,  589,  622,  724,
-          1004, 1045, 1258, 1439, 1966,
-          2335, 2749, 2941
+        "cured": [
+          1,
+          1,
+          3,
+          45,
+          46,
+          50,
+          83,
+          149,
+          160,
+          276,
+          414,
+          523,
+          589,
+          622,
+          724,
+          1004,
+          1045,
+          1258,
+          1439,
+          1966,
+          2335,
+          2749,
+          2941
         ],
-        positive: [
-            221,   311,   385,   588,
-            821,  1049,  1577,  1835,
-           2263,  2706,  3296,  3916,
-           5061,  6387,  7985,  8514,
-          10590, 12839, 14955, 17750,
-          20603, 23073, 26062
+        "positive": [
+          221,
+          311,
+          385,
+          588,
+          821,
+          1049,
+          1577,
+          1835,
+          2263,
+          2706,
+          3296,
+          3916,
+          5061,
+          6387,
+          7985,
+          8514,
+          10590,
+          12839,
+          14955,
+          17750,
+          20603,
+          23073,
+          26062
         ],
-        totalForcastedLinear: [
-          -6778, -5472, -4166, -2859, -1553,
-           -247,  1059,  2365,  3671,  4978,
-           6284,  7590,  8897, 10203, 11509,
-          12816, 14122, 15428, 16735, 18041,
-          19347, 20654, 21960, 23266, 24573,
-          25879, 27186, 28492, 29798, 31105
+        "totalForcastedLinear": [
+          -5472,
+          -4166,
+          -2859,
+          -1553,
+          -247,
+          1059,
+          2365,
+          3671,
+          4978,
+          6284,
+          7590,
+          8897,
+          10203,
+          11509,
+          12816,
+          14122,
+          15428,
+          16735,
+          18041,
+          19347,
+          20654,
+          21960,
+          23266,
+          24573,
+          25879,
+          27186,
+          28492,
+          29798,
+          31105,
+          32411
         ],
-        totalEquationLinear: 'y = 1306.342885375494x + -6778.89723320158',
-        totalR2Linear: 0.8430398034691996,
-        totalForcastedPower: [
-              0,    76,   258,   527,   875,
-           1296,  1787,  2345,  2966,  3650,
-           4395,  5198,  6059,  6976,  7949,
-           8976, 10057, 11190, 12375, 13611,
-          14898, 16235, 17621, 19056, 20540,
-          22071, 23649, 25274, 26946, 28664
+        "totalEquationLinear": "y = 1306.342885375494x + -6778.89723320158",
+        "totalR2Linear": 0.8430398034691996,
+        "totalForcastedPower": [
+          76,
+          258,
+          527,
+          875,
+          1296,
+          1787,
+          2345,
+          2966,
+          3650,
+          4395,
+          5198,
+          6059,
+          6976,
+          7949,
+          8976,
+          10057,
+          11190,
+          12375,
+          13611,
+          14898,
+          16235,
+          17621,
+          19056,
+          20540,
+          22071,
+          23649,
+          25274,
+          26946,
+          28664,
+          30428
         ],
-        totalEquationPower: 'y = 76.17898372860972x^1.7611549149196024',
-        totalR2Power: 0.7999586223508541,
-        totalForcastedExponential: [
-            499,    601,   723,   870,
-           1047,   1260,  1516,  1824,
-           2196,   2642,  3179,  3826,
-           4604,   5540,  6667,  8023,
-           9655,  11618, 13980, 16823,
-          20244,  24361, 29315, 35276,
-          42449,  51082, 61469, 73968,
-          89010, 107109
+        "totalEquationPower": "y = 76.17898372860972x^1.7611549149196024",
+        "totalR2Power": 0.7999586223508541,
+        "totalForcastedExponential": [
+          601,
+          723,
+          870,
+          1047,
+          1260,
+          1516,
+          1824,
+          2196,
+          2642,
+          3179,
+          3826,
+          4604,
+          5540,
+          6667,
+          8023,
+          9655,
+          11618,
+          13980,
+          16823,
+          20244,
+          24361,
+          29315,
+          35276,
+          42449,
+          51082,
+          61469,
+          73968,
+          89010,
+          107109,
+          128890
         ],
-        totalEquationExponential: 'y = 499.4714971402565e^(0.1851054843171713x)',
-        totalR2Exponential: 0.9888237664559552
+        "totalEquationExponential": "y = 499.4714971402565e^(0.1851054843171713x)",
+        "totalR2Exponential": 0.9888237664559552
       }
 
       const restrictedData = {
-        latestDate: '2020-03-17',
-        total: [
-          12462, 15113,
-          17660, 21157,
-          24747, 27980,
+        "latestDate": "2020-03-17",
+        "total": [
+          12462,
+          15113,
+          17660,
+          21157,
+          24747,
+          27980,
           31506
         ],
-        dead: [
-             7,   10,   12,   17,   21,
-            29,   34,   52,   79,  107,
-           148,  197,  233,  366,  463,
-           631,  827, 1016, 1266, 1441,
-          1809, 2158, 2503
+        "dead": [
+          7,
+          10,
+          12,
+          17,
+          21,
+          29,
+          34,
+          52,
+          79,
+          107,
+          148,
+          197,
+          233,
+          366,
+          463,
+          631,
+          827,
+          1016,
+          1266,
+          1441,
+          1809,
+          2158,
+          2503
         ],
-        cured: [
-             1,    1,    3,   45,   46,
-            50,   83,  149,  160,  276,
-           414,  523,  589,  622,  724,
-          1004, 1045, 1258, 1439, 1966,
-          2335, 2749, 2941
+        "cured": [
+          1,
+          1,
+          3,
+          45,
+          46,
+          50,
+          83,
+          149,
+          160,
+          276,
+          414,
+          523,
+          589,
+          622,
+          724,
+          1004,
+          1045,
+          1258,
+          1439,
+          1966,
+          2335,
+          2749,
+          2941
         ],
-        positive: [
-            221,   311,   385,   588,
-            821,  1049,  1577,  1835,
-           2263,  2706,  3296,  3916,
-           5061,  6387,  7985,  8514,
-          10590, 12839, 14955, 17750,
-          20603, 23073, 26062
+        "positive": [
+          221,
+          311,
+          385,
+          588,
+          821,
+          1049,
+          1577,
+          1835,
+          2263,
+          2706,
+          3296,
+          3916,
+          5061,
+          6387,
+          7985,
+          8514,
+          10590,
+          12839,
+          14955,
+          17750,
+          20603,
+          23073,
+          26062
         ],
-        totalForcastedLinear: [
-           8667, 11880, 15092,
-          18305, 21517, 24730,
-          27943, 31155, 34368,
-          37580, 40793, 44006,
-          47218, 50431
+        "totalForcastedLinear": [
+          11880,
+          15092,
+          18305,
+          21517,
+          24730,
+          27943,
+          31155,
+          34368,
+          37580,
+          40793,
+          44006,
+          47218,
+          50431,
+          53643
         ],
-        totalEquationLinear: 'y = 3212.6071428571427x + -42734.28571428571',
-        totalR2Linear: 0.9965170808080148,
-        totalForcastedPower: [
-          10451, 12608, 15048,
-          17788, 20849, 24247,
-          28001, 32130, 36653,
-          41589, 46956, 52773,
-          59059, 65834
+        "totalEquationLinear": "y = 3212.6071428571427x + -42734.28571428571",
+        "totalR2Linear": 0.9965170808080148,
+        "totalForcastedPower": [
+          12608,
+          15048,
+          17788,
+          20849,
+          24247,
+          28001,
+          32130,
+          36653,
+          41589,
+          46956,
+          52773,
+          59059,
+          65834,
+          73116
         ],
-        totalEquationPower: 'y = 1.9630631781287968x^3.0945880057661586',
-        totalR2Power: 0.9973175034146574,
-        totalForcastedExponential: [
-          11187, 13025, 15166,
-          17658, 20560, 23938,
-          27872, 32452, 37784,
-          43993, 51222, 59640,
-          69440, 80850
+        "totalEquationPower": "y = 1.9630631781287968x^3.0945880057661586",
+        "totalR2Power": 0.9973175034146574,
+        "totalForcastedExponential": [
+          13025,
+          15166,
+          17658,
+          20560,
+          23938,
+          27872,
+          32452,
+          37784,
+          43993,
+          51222,
+          59640,
+          69440,
+          80850,
+          94136
         ],
-        totalEquationExponential: 'y = 980.7541504434608e^(0.1521392866058737x)',
-        totalR2Exponential: 0.9922839787354703
+        "totalEquationExponential": "y = 980.7541504434608e^(0.1521392866058737x)",
+        "totalR2Exponential": 0.9922839787354703
       }
-
 
       function last(array) {
           return array[array.length - 1];
@@ -412,12 +641,18 @@
 
       document.querySelector('#linear-equation').textContent= allTimeData.totalEquationLinear
       document.querySelector('#linear-r2').textContent= allTimeData.totalR2Linear
-
       document.querySelector('#power-equation').textContent= allTimeData.totalEquationPower
       document.querySelector('#power-r2').textContent= allTimeData.totalR2Power
-
       document.querySelector('#exponential-equation').textContent= allTimeData.totalEquationExponential
       document.querySelector('#exponential-r2').textContent= allTimeData.totalR2Exponential
+
+      document.querySelector('#restricted-linear-equation').textContent= restrictedData.totalEquationLinear
+      document.querySelector('#restricted-linear-r2').textContent= restrictedData.totalR2Linear
+      document.querySelector('#restricted-power-equation').textContent= restrictedData.totalEquationPower
+      document.querySelector('#restricted-power-r2').textContent= restrictedData.totalR2Power
+      document.querySelector('#restricted-exponential-equation').textContent= restrictedData.totalEquationExponential
+      document.querySelector('#restricted-exponential-r2').textContent= restrictedData.totalR2Exponential
+
 
 
       function drawToday(){
@@ -429,7 +664,7 @@
   					datasets: [{
   						label: 'Total',
   						data: allTimeData.total,
-  						borderColor: 'rgb(255, 100, 100)',
+  						borderColor: 'rgba(0, 0, 0,0.8)',
   						fill: false,
               showLine: false
   					}]
