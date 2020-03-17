@@ -127,14 +127,20 @@
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Fitting equations to the data of total cases</h4>
-                  <p>Linear: y = 1199.3427442123095x + -5922.896103896105 , r^2 = 0.8412082535409161</p>
-                  <p>Power: y = 80.07637574860617x^1.728136280128634 , r^2 = 0.7976393115797835</p>
-                  <p>Exponential: y = 455.56983838327466e^(0.1914892651357751x) , r^2 = 0.9919108426183154</p>
+                  <p>Linear: <span id="linear-equation"></span> , r^2 = <span id="linear-r2"></span></p>
+                  <p>Power: <span id="power-equation"></span> , r^2 = <span id="power-r2"></span></p>
+                  <p>Exponential: <span id="exponential-equation"></span> , r^2 = <span id="exponential-r2"></span></p>
                 </div>
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Data and equations on a chart</h4>
                   <div class="data-equations-chart-container">
+                  </div>
+                </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Restricting to last 7 days</h4>
+                  <div class="data-equations-restricted-chart-container">
                   </div>
                 </div>
 
@@ -260,30 +266,37 @@
 			dataEquationsDiv.appendChild(dataEquationsCanvas);
 			dataEquationsContainer.appendChild(dataEquationsDiv);
 
+			const dataEquationsRestrictedContainer = document.querySelector('.data-equations-restricted-chart-container');
+			const dataEquationsRestrictedDiv = document.createElement('div');
+			dataEquationsRestrictedDiv.classList.add('chart-container');
+			const dataEquationsRestrictedCanvas = document.createElement('canvas');
+			dataEquationsRestrictedDiv.appendChild(dataEquationsRestrictedCanvas);
+			dataEquationsRestrictedContainer.appendChild(dataEquationsRestrictedDiv);
+
       function getLabels(data){return  data.map( (e,i) => 'Day '+(i+1) )}
-      const outputObject = {
-        latestDate: '2020-03-16',
+      const allTimeData = {
+        latestDate: '2020-03-17',
         total: [
             229,   322,   400,   650,
             888,  1128,  1694,  2036,
            2502,  3089,  3858,  4636,
            5883,  7375,  9172, 10149,
           12462, 15113, 17660, 21157,
-          24747, 27980
+          24747, 27980, 31506
         ],
         dead: [
              7,   10,   12,   17,   21,
             29,   34,   52,   79,  107,
            148,  197,  233,  366,  463,
            631,  827, 1016, 1266, 1441,
-          1809, 2158
+          1809, 2158, 2503
         ],
         cured: [
              1,    1,    3,   45,   46,
             50,   83,  149,  160,  276,
            414,  523,  589,  622,  724,
           1004, 1045, 1258, 1439, 1966,
-          2335, 2749
+          2335, 2749, 2941
         ],
         positive: [
             221,   311,   385,   588,
@@ -291,56 +304,131 @@
            2263,  2706,  3296,  3916,
            5061,  6387,  7985,  8514,
           10590, 12839, 14955, 17750,
-          20603, 23073
+          20603, 23073, 26062
         ],
         totalForcastedLinear: [
-          -5922, -4723, -3524, -2324, -1125,
-             73,  1273,  2472,  3671,  4871,
-           6070,  7269,  8469,  9668, 10867,
-          12067, 13266, 14465, 15665, 16864,
-          18063, 19263, 20462, 21661, 22861,
-          24060, 25260, 26459, 27658
+          -6778, -5472, -4166, -2859, -1553,
+           -247,  1059,  2365,  3671,  4978,
+           6284,  7590,  8897, 10203, 11509,
+          12816, 14122, 15428, 16735, 18041,
+          19347, 20654, 21960, 23266, 24573,
+          25879, 27186, 28492, 29798, 31105
         ],
+        totalEquationLinear: 'y = 1306.342885375494x + -6778.89723320158',
+        totalR2Linear: 0.8430398034691996,
         totalForcastedPower: [
-              0,    80,   265,   534,   878,
-           1292,  1771,  2311,  2911,  3569,
-           4281,  5048,  5867,  6738,  7658,
-           8628,  9646, 10712, 11824, 12982,
-          14186, 15434, 16726, 18061, 19440,
-          20861, 22323, 23828, 25374
+              0,    76,   258,   527,   875,
+           1296,  1787,  2345,  2966,  3650,
+           4395,  5198,  6059,  6976,  7949,
+           8976, 10057, 11190, 12375, 13611,
+          14898, 16235, 17621, 19056, 20540,
+          22071, 23649, 25274, 26946, 28664
         ],
+        totalEquationPower: 'y = 76.17898372860972x^1.7611549149196024',
+        totalR2Power: 0.7999586223508541,
         totalForcastedExponential: [
-            455,   551,   668,   809,   979,
-           1186,  1437,  1740,  2107,  2552,
-           3091,  3744,  4534,  5491,  6650,
-           8053,  9753, 11811, 14304, 17323,
-          20980, 25408, 30770, 37264, 45129,
-          54654, 66189, 80158, 97075
-        ]
+            499,    601,   723,   870,
+           1047,   1260,  1516,  1824,
+           2196,   2642,  3179,  3826,
+           4604,   5540,  6667,  8023,
+           9655,  11618, 13980, 16823,
+          20244,  24361, 29315, 35276,
+          42449,  51082, 61469, 73968,
+          89010, 107109
+        ],
+        totalEquationExponential: 'y = 499.4714971402565e^(0.1851054843171713x)',
+        totalR2Exponential: 0.9888237664559552
       }
+
+      const restrictedData = {
+        latestDate: '2020-03-17',
+        total: [
+          12462, 15113,
+          17660, 21157,
+          24747, 27980,
+          31506
+        ],
+        dead: [
+             7,   10,   12,   17,   21,
+            29,   34,   52,   79,  107,
+           148,  197,  233,  366,  463,
+           631,  827, 1016, 1266, 1441,
+          1809, 2158, 2503
+        ],
+        cured: [
+             1,    1,    3,   45,   46,
+            50,   83,  149,  160,  276,
+           414,  523,  589,  622,  724,
+          1004, 1045, 1258, 1439, 1966,
+          2335, 2749, 2941
+        ],
+        positive: [
+            221,   311,   385,   588,
+            821,  1049,  1577,  1835,
+           2263,  2706,  3296,  3916,
+           5061,  6387,  7985,  8514,
+          10590, 12839, 14955, 17750,
+          20603, 23073, 26062
+        ],
+        totalForcastedLinear: [
+           8667, 11880, 15092,
+          18305, 21517, 24730,
+          27943, 31155, 34368,
+          37580, 40793, 44006,
+          47218, 50431
+        ],
+        totalEquationLinear: 'y = 3212.6071428571427x + -42734.28571428571',
+        totalR2Linear: 0.9965170808080148,
+        totalForcastedPower: [
+          10451, 12608, 15048,
+          17788, 20849, 24247,
+          28001, 32130, 36653,
+          41589, 46956, 52773,
+          59059, 65834
+        ],
+        totalEquationPower: 'y = 1.9630631781287968x^3.0945880057661586',
+        totalR2Power: 0.9973175034146574,
+        totalForcastedExponential: [
+          11187, 13025, 15166,
+          17658, 20560, 23938,
+          27872, 32452, 37784,
+          43993, 51222, 59640,
+          69440, 80850
+        ],
+        totalEquationExponential: 'y = 980.7541504434608e^(0.1521392866058737x)',
+        totalR2Exponential: 0.9922839787354703
+      }
+
+
       function last(array) {
           return array[array.length - 1];
       }
-      document.querySelector('#latest-date').textContent= outputObject.latestDate
+      document.querySelector('#latest-date').textContent= allTimeData.latestDate
 
-      document.querySelector('#total-number').textContent= last(outputObject.total)
-      document.querySelector('#dead-number').textContent= last(outputObject.dead)
-      document.querySelector('#cured-number').textContent= last(outputObject.cured)
-      document.querySelector('#positive-number').textContent= last(outputObject.positive)
+      document.querySelector('#total-number').textContent= last(allTimeData.total)
+      document.querySelector('#dead-number').textContent= last(allTimeData.dead)
+      document.querySelector('#cured-number').textContent= last(allTimeData.cured)
+      document.querySelector('#positive-number').textContent= last(allTimeData.positive)
 
-			const data = outputObject.total
-			const linear = outputObject.totalForcastedLinear
-			const power = outputObject.totalForcastedPower
-			const exponential = outputObject.totalForcastedExponential
+      document.querySelector('#linear-equation').textContent= allTimeData.totalEquationLinear
+      document.querySelector('#linear-r2').textContent= allTimeData.totalR2Linear
+
+      document.querySelector('#power-equation').textContent= allTimeData.totalEquationPower
+      document.querySelector('#power-r2').textContent= allTimeData.totalR2Power
+
+      document.querySelector('#exponential-equation').textContent= allTimeData.totalEquationExponential
+      document.querySelector('#exponential-r2').textContent= allTimeData.totalR2Exponential
+
+
       function drawToday(){
         const ctx = todayCanvas.getContext('2d');
   			const options = {
   				type: 'line',
   				data: {
-  					labels: getLabels(data),
+  					labels: getLabels(allTimeData.total),
   					datasets: [{
   						label: 'Total',
-  						data: data,
+  						data: allTimeData.total,
   						borderColor: 'rgb(255, 100, 100)',
   						fill: false,
               showLine: false
@@ -352,23 +440,24 @@
   			};
   			new Chart(ctx, options);
       }
-      function drawDataEquations(){
-        const ctx = dataEquationsCanvas.getContext('2d');
+      function drawDataEquations(canvas,totalDatapoints,linearDatapoints,powerDatapoints,exponentialDatapoints,labels){
+        const ctx = canvas.getContext('2d');
+
   			const options = {
   				type: 'line',
   				data: {
-  					labels: getLabels(exponential),
+  					labels: labels,
   					datasets: [
               {
   						label: 'Total',
-  						data: data,
+  						data: totalDatapoints,
   						borderColor: 'rgba(0, 0, 0,0.8)',
   						fill: false,
               showLine: false
   					},
             {
   						label: 'Linear',
-  						data: linear,
+  						data: linearDatapoints,
   						borderColor: 'rgba(80, 80, 150,0.5)',
   						fill: false,
               showLine: true,
@@ -376,7 +465,7 @@
   					},
             {
   						label: 'Power',
-  						data: power,
+  						data: powerDatapoints,
   						borderColor: 'rgba(80, 150, 80,0.5)',
   						fill: false,
               showLine: true,
@@ -384,7 +473,7 @@
   					},
             {
   						label: 'Exponential',
-  						data: exponential,
+  						data: exponentialDatapoints,
   						borderColor: 'rgba(150, 80, 80,0.5)',
   						fill: false,
               showLine: true,
@@ -398,7 +487,9 @@
   			new Chart(ctx, options);
       }
       drawToday()
-      drawDataEquations()
+      drawDataEquations(dataEquationsCanvas, allTimeData.total, allTimeData.totalForcastedLinear, allTimeData.totalForcastedPower, allTimeData.totalForcastedExponential,getLabels(allTimeData.totalForcastedExponential))
+      drawDataEquations(dataEquationsRestrictedCanvas, restrictedData.total, restrictedData.totalForcastedLinear, restrictedData.totalForcastedPower, restrictedData.totalForcastedExponential, new Array(restrictedData.totalForcastedExponential.length).fill(''))
+
 		};
 	</script>
 </body>
