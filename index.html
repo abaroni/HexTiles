@@ -86,7 +86,7 @@
     <div class="container">
       <div class="row d-flex align-items-center">
       <div class=" col-lg-6 py-5 py-lg-0 order-2 order-lg-1" data-aos="fade-right">
-        <h1>Warning</h1>
+        <h1>⚠️Warning⚠️</h1>
         <h2>This is not a forecast of how COVID-19 will impact italy. I'm just a kid with some javascript and governament data, not taking into account a lot of things. Please do not share on social media without this warning.</h2>
         <a href="#about" class="btn-get-started scrollto">I understand</a>
       </div>
@@ -134,7 +134,7 @@
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Data and equations on a chart</h4>
-                  <div class="data-equations-chart-container">
+                  <div class="data-equations-chart-container" style="padding-right: 15px;">
                   </div>
                 </div>
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
@@ -147,7 +147,7 @@
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Data and equations on a chart (restricting to last 7 days)</h4>
-                  <div class="data-equations-restricted-chart-container">
+                  <div class="data-equations-restricted-chart-container"  style="padding-right: 15px;">
                   </div>
                 </div>
 
@@ -653,7 +653,9 @@
       document.querySelector('#restricted-exponential-equation').textContent= restrictedData.totalEquationExponential
       document.querySelector('#restricted-exponential-r2').textContent= restrictedData.totalR2Exponential
 
-
+      function roundTicks(value, index, values) {
+          return (value > 1000 ||value<-1000)? Math.round(value/1000)+'K':value
+      }
 
       function drawToday(){
         const ctx = todayCanvas.getContext('2d');
@@ -670,7 +672,15 @@
   					}]
   				},
   				options: {
-  					responsive: true
+  					responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: roundTicks
+                    }
+                }]
+            }
   				}
   			};
   			new Chart(ctx, options);
@@ -695,28 +705,33 @@
   						data: linearDatapoints,
   						borderColor: 'rgba(80, 80, 150,0.5)',
   						fill: false,
-              showLine: true,
-              pointRadius: 1
+              showLine: true
   					},
             {
   						label: 'Power',
   						data: powerDatapoints,
   						borderColor: 'rgba(80, 150, 80,0.5)',
   						fill: false,
-              showLine: true,
-              pointRadius: 1
+              showLine: true
   					},
             {
   						label: 'Exponential',
   						data: exponentialDatapoints,
   						borderColor: 'rgba(150, 80, 80,0.5)',
   						fill: false,
-              showLine: true,
-              pointRadius: 1
+              showLine: true
   					}]
   				},
   				options: {
-  					responsive: true
+  					responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: roundTicks
+                    }
+                }]
+            }
   				}
   			};
   			new Chart(ctx, options);
