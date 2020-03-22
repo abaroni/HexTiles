@@ -121,8 +121,11 @@
                 <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="50">
                   <i class="bx bx-images"></i>
                   <h4><a href="#">Charted data up to today</a></h4>
-                  <div class="today-chart-container">
-                  </div>
+
+                    <div class="chart-container">
+                      <canvas id="todayCanvas"></canvas>
+                    </div>
+
                 </div>
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
@@ -134,8 +137,9 @@
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Data and equations on a chart</h4>
-                  <div class="data-equations-chart-container" style="padding-right: 15px;">
-                  </div>
+                    <div class="chart-container"  style="padding-right: 15px;">
+                      <canvas id="dataEquationsCanvas"></canvas>
+                    </div>
                 </div>
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
@@ -147,7 +151,8 @@
                 <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
                   <i class="bx bx-images"></i>
                   <h4>Data and equations on a chart (restricting to last 7 days)</h4>
-                  <div class="data-equations-restricted-chart-container"  style="padding-right: 15px;">
+                  <div class="chart-container"  style="padding-right: 15px;">
+                    <canvas id="dataEquationsRestrictedCanvas"></canvas>
                   </div>
                 </div>
 
@@ -256,48 +261,29 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/regression.js"></script>
+  <script src="assets/js/ucsv.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" integrity="sha256-8zyeSXm+yTvzUN1VgAOinFgaVFEFTyYzWShOy9w7WoQ=" crossorigin="anonymous"></script>
   <script>
-    function fetchJSONFile(path, callback) {
-      var httpRequest = new XMLHttpRequest();
-      httpRequest.onreadystatechange = function() {
-          if (httpRequest.readyState === 4) {
-              if (httpRequest.status === 200) {
-                  var data = JSON.parse(httpRequest.responseText);
-                  if (callback) callback(data);
-              }else{
-                  callback(null,httpRequest)
-              }
-          }
-      };
-      httpRequest.open('GET', path);
-      httpRequest.send();
-    }
+      function fetchFile(path, callback) {
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            if (httpRequest.readyState === 4) {
+                if (httpRequest.status === 200) {
+                    if (callback) callback(httpRequest.responseText);
+                }else{
+                    callback(null,httpRequest)
+                }
+            }
+        };
+        httpRequest.open('GET', path);
+        httpRequest.send();
+      }
 
 		window.onload = function() {
-
-
-			const todayContainer = document.querySelector('.today-chart-container');
-			const todayDiv = document.createElement('div');
-			todayDiv.classList.add('chart-container');
-			const todayCanvas = document.createElement('canvas');
-			todayDiv.appendChild(todayCanvas);
-			todayContainer.appendChild(todayDiv);
-
-			const dataEquationsContainer = document.querySelector('.data-equations-chart-container');
-			const dataEquationsDiv = document.createElement('div');
-			dataEquationsDiv.classList.add('chart-container');
-			const dataEquationsCanvas = document.createElement('canvas');
-			dataEquationsDiv.appendChild(dataEquationsCanvas);
-			dataEquationsContainer.appendChild(dataEquationsDiv);
-
-			const dataEquationsRestrictedContainer = document.querySelector('.data-equations-restricted-chart-container');
-			const dataEquationsRestrictedDiv = document.createElement('div');
-			dataEquationsRestrictedDiv.classList.add('chart-container');
-			const dataEquationsRestrictedCanvas = document.createElement('canvas');
-			dataEquationsRestrictedDiv.appendChild(dataEquationsRestrictedCanvas);
-			dataEquationsRestrictedContainer.appendChild(dataEquationsRestrictedDiv);
-
+      const todayCanvas = document.querySelector('#todayCanvas')
+      const dataEquationsCanvas = document.querySelector('#dataEquationsCanvas')
+      const dataEquationsRestrictedCanvas = document.querySelector('#dataEquationsRestrictedCanvas')
 
       function roundTicks(value, index, values) {
           return (value > 1000 ||value<-1000)? Math.round(value/1000)+'K':value
@@ -305,8 +291,8 @@
 
       function getLabels(data){
         let lastDate = last(data.dates)
-        console.log(data.totalForcastedLinear.length - data.dates.length)
-        let newArray = new Array(data.totalForcastedLinear.length - data.dates.length).fill()
+        console.log(data.timeWindow)
+        let newArray = new Array(data.timeWindow.length - data.dates.length).fill()
         newArray = newArray.map(function(element){
           let dateObject = new Date(lastDate)
           //mutating dateObject
@@ -350,7 +336,12 @@
   			};
   			new Chart(ctx, options);
       }
-      function drawDataEquations(canvas,totalDatapoints,linearDatapoints,powerDatapoints,exponentialDatapoints,labels){
+      function drawDataEquations(canvas,data){
+        const totalDatapoints = data.total
+        const linearDatapoints = data.timeWindow.map(e=> parseInt(data.TF.linear.predict(e)[1]))
+        const powerDatapoints = data.timeWindow.map(e=> parseInt(data.TF.power.predict(e)[1]))
+        const exponentialDatapoints = data.timeWindow.map(e=> parseInt(data.TF.exponential.predict(e)[1]))
+        const labels = getLabels(data)
         const ctx = canvas.getContext('2d');
 
   			const options = {
@@ -401,43 +392,102 @@
   			};
   			new Chart(ctx, options);
       }
+      
       let allTimeData = null
       let restrictedData = null
-      fetchJSONFile('assets/data/restrictedData.json', function(data,error){
-          // do something with your data
-          restrictedData = data
-          fetchJSONFile('assets/data/allData.json', function(data,error){
-              // do something with your data
-              allTimeData = data
-              document.querySelector('#latest-date').textContent= allTimeData.latestDate
 
-              document.querySelector('#total-number').textContent= last(allTimeData.total)
-              document.querySelector('#dead-number').textContent= last(allTimeData.dead)
-              document.querySelector('#cured-number').textContent= last(allTimeData.cured)
-              document.querySelector('#positive-number').textContent= last(allTimeData.positive)
+      fetchFile('/assets/data/dpc-covid19-ita-andamento-nazionale.csv',function(data,error){
+        const dailyArray = CSV.csvToObject(data)
 
-              document.querySelector('#linear-equation').textContent= allTimeData.totalEquationLinear
-              document.querySelector('#linear-r2').textContent= allTimeData.totalR2Linear
-              document.querySelector('#power-equation').textContent= allTimeData.totalEquationPower
-              document.querySelector('#power-r2').textContent= allTimeData.totalR2Power
-              document.querySelector('#exponential-equation').textContent= allTimeData.totalEquationExponential
-              document.querySelector('#exponential-r2').textContent= allTimeData.totalR2Exponential
+        const positive = []
+        const cured = []
+        const dead = []
+        const total = []
+        const dates= []
+        let latest = null
+        dailyArray.forEach((item,i) => {
+          positive.push([i+1,parseInt(item.totale_attualmente_positivi)])
+          dead.push([i+1,parseInt(item.deceduti)])
+          cured.push([i+1,parseInt(item.dimessi_guariti)])
+          total.push([i+1,parseInt(item.totale_casi)])
+          dates.push(item.data.split(' ')[0])
+          latest = item
+        })
 
-              document.querySelector('#restricted-linear-equation').textContent= restrictedData.totalEquationLinear
-              document.querySelector('#restricted-linear-r2').textContent= restrictedData.totalR2Linear
-              document.querySelector('#restricted-power-equation').textContent= restrictedData.totalEquationPower
-              document.querySelector('#restricted-power-r2').textContent= restrictedData.totalR2Power
-              document.querySelector('#restricted-exponential-equation').textContent= restrictedData.totalEquationExponential
-              document.querySelector('#restricted-exponential-r2').textContent= restrictedData.totalR2Exponential
+        function forecasts(array, latest_to_consider = array.length,day = FORECAST_TOMORROW, method = regression.exponential ){
+          const startIndex = dailyArray.length - latest_to_consider
+          const endIndex = dailyArray.length
+          const blindDates = dates.map(d => d.split(' ')[0]).slice(startIndex,endIndex)
+          let blind = array.slice(startIndex,endIndex)
 
-              drawToday()
-              drawDataEquations(dataEquationsCanvas, allTimeData.total, allTimeData.totalForcastedLinear, allTimeData.totalForcastedPower, allTimeData.totalForcastedExponential,getLabels(allTimeData))
-              drawDataEquations(dataEquationsRestrictedCanvas, restrictedData.total, restrictedData.totalForcastedLinear, restrictedData.totalForcastedPower, restrictedData.totalForcastedExponential, getLabels(restrictedData))
 
-          })
+          let return_object = {
+            dates : blindDates,
+            dataPoints: blind,
+            exponential : regression.exponential(blind,{ precision: 16 }),
+            linear :  regression.linear(blind,{ precision: 16 }),
+            power: regression.power(blind,{ precision: 16 })
+          }
+          return return_object
+
+        }
+
+        function getOutputObject(days = total.length){
+          const totalForecasts = forecasts(total,days)
+          const startingDay = totalForecasts.dataPoints[0][0]
+          const finalDay = totalForecasts.dataPoints[totalForecasts.dataPoints.length - 1][0]
+
+          const FUTURE_TIME_WINDOW = 7
+          const timeWindow = []
+          for(let day = startingDay; day<= finalDay +FUTURE_TIME_WINDOW ; day++){
+            timeWindow.push(day)
+          }
+
+          return {
+            TF : totalForecasts,
+            timeWindow: timeWindow,
+            dates: totalForecasts.dates,
+            latestDate: latest.data.split(' ')[0],
+            total:totalForecasts.dataPoints.map(e=>e[1]),
+            dead: dead.map(e=>e[1]),
+            cured: cured.map(e=>e[1]),
+            positive: positive.map(e=>e[1])
+          }
+        }
+
+        const FORECAST_TOMORROW = dailyArray.length
+        const FORECAST_ONE_WEEK = dailyArray.length + 6
+
+        allTimeData = getOutputObject()
+        restrictedData = getOutputObject(7)
+
+        document.querySelector('#latest-date').textContent= allTimeData.latestDate
+
+        document.querySelector('#total-number').textContent= last(allTimeData.total)
+        document.querySelector('#dead-number').textContent= last(allTimeData.dead)
+        document.querySelector('#cured-number').textContent= last(allTimeData.cured)
+        document.querySelector('#positive-number').textContent= last(allTimeData.positive)
+
+        document.querySelector('#linear-equation').textContent= allTimeData.TF.linear.string
+        document.querySelector('#linear-r2').textContent= allTimeData.TF.linear.r2
+        document.querySelector('#power-equation').textContent= allTimeData.TF.power.string
+        document.querySelector('#power-r2').textContent= allTimeData.TF.power.r2
+        document.querySelector('#exponential-equation').textContent= allTimeData.TF.exponential.string
+        document.querySelector('#exponential-r2').textContent= allTimeData.TF.exponential.r2
+
+        document.querySelector('#restricted-linear-equation').textContent= restrictedData.TF.linear.string
+        document.querySelector('#restricted-linear-r2').textContent= restrictedData.TF.linear.r2
+        document.querySelector('#restricted-power-equation').textContent= restrictedData.TF.power.string
+        document.querySelector('#restricted-power-r2').textContent= restrictedData.TF.power.r2
+        document.querySelector('#restricted-exponential-equation').textContent= restrictedData.TF.exponential.string
+        document.querySelector('#restricted-exponential-r2').textContent= restrictedData.TF.exponential.r2
+        drawToday()
+        drawDataEquations(dataEquationsCanvas, allTimeData)
+        drawDataEquations(dataEquationsRestrictedCanvas, restrictedData)
+        //drawDataEquations(dataEquationsCanvas, allTimeData.total, allTimeData.totalForcastedLinear, allTimeData.totalForcastedPower, allTimeData.totalForcastedExponential,getLabels(allTimeData))
+        //drawDataEquations(dataEquationsRestrictedCanvas, restrictedData.total, restrictedData.totalForcastedLinear, restrictedData.totalForcastedPower, restrictedData.totalForcastedExponential, getLabels(restrictedData))
+
       })
-
-
 		};
 	</script>
 </body>
