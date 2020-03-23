@@ -155,6 +155,30 @@
                     <canvas id="dataEquationsRestrictedCanvas"></canvas>
                   </div>
                 </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Region data and equations on a chart</h4>
+                  <form>
+                     <fieldset>
+                        <legend>Selecting elements</legend>
+                        <p>
+                           <label>Select region</label>
+                           <select id = "regionsList">    <option value="label">--Please choose an option--</option>
+                           </select>
+                        </p>
+                     </fieldset>
+                  </form>
+                  <div class="chart-container"  style="padding-right: 15px;">
+                    <canvas id="regionChart"></canvas>
+                  </div>
+                </div>
+                <div class="col-md-12 icon-box" data-aos="fade-up" data-aos-delay="100">
+                  <i class="bx bx-images"></i>
+                  <h4>Region data and equations on a chart (restricting to last 7 days)</h4>
+                  <div class="chart-container"  style="padding-right: 15px;">
+                    <canvas id="regionRestrictedChart"></canvas>
+                  </div>
+                </div>
 
               </div>
             </div><!-- End .content-->
@@ -281,18 +305,27 @@
       }
 
 		window.onload = function() {
-      const todayCanvas = document.querySelector('#todayCanvas')
-      const dataEquationsCanvas = document.querySelector('#dataEquationsCanvas')
-      const dataEquationsRestrictedCanvas = document.querySelector('#dataEquationsRestrictedCanvas')
+
+      document.addEventListener('input', function (event) {
+        // Only run for #regionsList select
+        if (event.target.id == 'regionsList') {
+          fetchFile('/assets/data/dpc-covid19-ita-regioni.csv',function(data,error){
+            console.log(event.target.value)
+            if(event.target.value != "label") loadRegion(data,event.target.value)
+          })
+
+        }
+
+      }, false);
 
       function roundTicks(value, index, values) {
           return (value > 1000 ||value<-1000)? Math.round(value/1000)+'K':value
       }
 
       function getLabels(data){
-        let lastDate = last(data.dates)
-        console.log(data.timeWindow)
-        let newArray = new Array(data.timeWindow.length - data.dates.length).fill()
+        let lastDate = last(data.forecasts.dates)
+        //console.log(data.timeWindow)
+        let newArray = new Array(data.timeWindow.length - data.forecasts.dates.length).fill()
         newArray = newArray.map(function(element){
           let dateObject = new Date(lastDate)
           //mutating dateObject
@@ -300,7 +333,7 @@
           lastDate = dateObject.toISOString().split('T')[0]
           return lastDate
         })
-        return data.dates.concat(newArray)
+        return data.forecasts.dates.concat(newArray)
       }
 
       function last(array) {
@@ -308,15 +341,15 @@
       }
 
 
-      function drawToday(){
+      function drawToday(data){
         const ctx = todayCanvas.getContext('2d');
   			const options = {
   				type: 'line',
   				data: {
-  					labels: allTimeData.dates,
+  					labels: data.forecasts.dates,
   					datasets: [{
   						label: 'Total',
-  						data: allTimeData.total,
+  						data: data.dataPoints,
   						borderColor: 'rgba(0, 0, 0,0.8)',
   						fill: false,
               showLine: false
@@ -337,10 +370,10 @@
   			new Chart(ctx, options);
       }
       function drawDataEquations(canvas,data){
-        const totalDatapoints = data.total
-        const linearDatapoints = data.timeWindow.map(e=> parseInt(data.TF.linear.predict(e)[1]))
-        const powerDatapoints = data.timeWindow.map(e=> parseInt(data.TF.power.predict(e)[1]))
-        const exponentialDatapoints = data.timeWindow.map(e=> parseInt(data.TF.exponential.predict(e)[1]))
+        const totalDatapoints = data.dataPoints
+        const linearDatapoints = data.timeWindow.map(e=> parseInt(data.forecasts.linear.predict(e)[1]))
+        const powerDatapoints = data.timeWindow.map(e=> parseInt(data.forecasts.power.predict(e)[1]))
+        const exponentialDatapoints = data.timeWindow.map(e=> parseInt(data.forecasts.exponential.predict(e)[1]))
         const labels = getLabels(data)
         const ctx = canvas.getContext('2d');
 
@@ -392,9 +425,75 @@
   			};
   			new Chart(ctx, options);
       }
-      
-      let allTimeData = null
-      let restrictedData = null
+
+
+      function forecasts(array, dates,latest_to_consider = array.length ){
+        const startIndex = array.length - latest_to_consider
+        const endIndex = array.length
+        const blindDates = dates.map(d => d.split(' ')[0]).slice(startIndex,endIndex)
+        const blind = array.slice(startIndex,endIndex)
+
+        let return_object = {
+          dates : blindDates,
+          dataPoints: blind,
+          exponential : regression.exponential(blind,{ precision: 16 }),
+          linear :  regression.linear(blind,{ precision: 16 }),
+          power: regression.power(blind,{ precision: 16 })
+        }
+        return return_object
+
+      }
+
+      function getOutputObject(data, dates, days = data.length){
+        const fc = forecasts(data,dates,days)
+        const startingDay = fc.dataPoints[0][0]
+        const finalDay = fc.dataPoints[fc.dataPoints.length - 1][0]
+
+        const FUTURE_TIME_WINDOW = 7
+        const timeWindow = []
+        for(let day = startingDay; day<= finalDay +FUTURE_TIME_WINDOW ; day++){
+          timeWindow.push(day)
+        }
+
+        return {
+          forecasts : fc,
+          timeWindow: timeWindow,
+          dataPoints: fc.dataPoints.map(e=>e[1]),
+        }
+      }
+
+      function loadRegion(data,region){
+                const dailyArray = CSV.csvToObject(data).filter(e => e.denominazione_regione == region)
+                const total = []
+                const dates= []
+                //console.log(dailyArray)
+                dailyArray.forEach((item,i) => {
+                  total.push([i+1,parseInt(item.totale_casi)+1])
+                  dates.push(item.data.split(' ')[0])
+                })
+
+                const allTimeAbruzzoData = getOutputObject(total,dates)
+                const restrictedAbruzzoData = getOutputObject(total,dates,7)
+
+                const allTimeAbruzzoCanvas = document.querySelector('#regionChart')
+                const restrictedAbruzzoCanvas = document.querySelector('#regionRestrictedChart')
+
+                const parent = allTimeAbruzzoCanvas.parentNode
+                parent.removeChild(allTimeAbruzzoCanvas)
+                const newRegionAllTime = document.createElement('canvas')
+                newRegionAllTime.id = 'regionChart'
+                parent.appendChild(newRegionAllTime)
+
+                const parentRestricted = restrictedAbruzzoCanvas.parentNode
+                parentRestricted.removeChild(restrictedAbruzzoCanvas)
+                const newRegionRestricted = document.createElement('canvas')
+                newRegionRestricted.id = 'regionRestrictedChart'
+                parentRestricted.appendChild(newRegionRestricted)
+
+                drawDataEquations(newRegionAllTime, allTimeAbruzzoData)
+                drawDataEquations(newRegionRestricted, restrictedAbruzzoData)
+
+      }
 
       fetchFile('/assets/data/dpc-covid19-ita-andamento-nazionale.csv',function(data,error){
         const dailyArray = CSV.csvToObject(data)
@@ -404,90 +503,60 @@
         const dead = []
         const total = []
         const dates= []
-        let latest = null
         dailyArray.forEach((item,i) => {
           positive.push([i+1,parseInt(item.totale_attualmente_positivi)])
           dead.push([i+1,parseInt(item.deceduti)])
           cured.push([i+1,parseInt(item.dimessi_guariti)])
           total.push([i+1,parseInt(item.totale_casi)])
           dates.push(item.data.split(' ')[0])
-          latest = item
         })
 
-        function forecasts(array, latest_to_consider = array.length,day = FORECAST_TOMORROW, method = regression.exponential ){
-          const startIndex = dailyArray.length - latest_to_consider
-          const endIndex = dailyArray.length
-          const blindDates = dates.map(d => d.split(' ')[0]).slice(startIndex,endIndex)
-          let blind = array.slice(startIndex,endIndex)
+        const allTimeData = getOutputObject(total,dates)
+        const restrictedData = getOutputObject(total,dates,7)
 
+        document.querySelector('#latest-date').textContent= last(dates)
 
-          let return_object = {
-            dates : blindDates,
-            dataPoints: blind,
-            exponential : regression.exponential(blind,{ precision: 16 }),
-            linear :  regression.linear(blind,{ precision: 16 }),
-            power: regression.power(blind,{ precision: 16 })
-          }
-          return return_object
+        document.querySelector('#total-number').textContent= last(total)[1]
+        document.querySelector('#dead-number').textContent= last(dead)[1]
+        document.querySelector('#cured-number').textContent= last(cured)[1]
+        document.querySelector('#positive-number').textContent= last(positive)[1]
 
-        }
+        document.querySelector('#linear-equation').textContent= allTimeData.forecasts.linear.string
+        document.querySelector('#linear-r2').textContent= allTimeData.forecasts.linear.r2
+        document.querySelector('#power-equation').textContent= allTimeData.forecasts.power.string
+        document.querySelector('#power-r2').textContent= allTimeData.forecasts.power.r2
+        document.querySelector('#exponential-equation').textContent= allTimeData.forecasts.exponential.string
+        document.querySelector('#exponential-r2').textContent= allTimeData.forecasts.exponential.r2
 
-        function getOutputObject(days = total.length){
-          const totalForecasts = forecasts(total,days)
-          const startingDay = totalForecasts.dataPoints[0][0]
-          const finalDay = totalForecasts.dataPoints[totalForecasts.dataPoints.length - 1][0]
+        document.querySelector('#restricted-linear-equation').textContent= restrictedData.forecasts.linear.string
+        document.querySelector('#restricted-linear-r2').textContent= restrictedData.forecasts.linear.r2
+        document.querySelector('#restricted-power-equation').textContent= restrictedData.forecasts.power.string
+        document.querySelector('#restricted-power-r2').textContent= restrictedData.forecasts.power.r2
+        document.querySelector('#restricted-exponential-equation').textContent= restrictedData.forecasts.exponential.string
+        document.querySelector('#restricted-exponential-r2').textContent= restrictedData.forecasts.exponential.r2
 
-          const FUTURE_TIME_WINDOW = 7
-          const timeWindow = []
-          for(let day = startingDay; day<= finalDay +FUTURE_TIME_WINDOW ; day++){
-            timeWindow.push(day)
-          }
+        const todayCanvas = document.querySelector('#todayCanvas')
+        const dataEquationsCanvas = document.querySelector('#dataEquationsCanvas')
+        const dataEquationsRestrictedCanvas = document.querySelector('#dataEquationsRestrictedCanvas')
 
-          return {
-            TF : totalForecasts,
-            timeWindow: timeWindow,
-            dates: totalForecasts.dates,
-            latestDate: latest.data.split(' ')[0],
-            total:totalForecasts.dataPoints.map(e=>e[1]),
-            dead: dead.map(e=>e[1]),
-            cured: cured.map(e=>e[1]),
-            positive: positive.map(e=>e[1])
-          }
-        }
-
-        const FORECAST_TOMORROW = dailyArray.length
-        const FORECAST_ONE_WEEK = dailyArray.length + 6
-
-        allTimeData = getOutputObject()
-        restrictedData = getOutputObject(7)
-
-        document.querySelector('#latest-date').textContent= allTimeData.latestDate
-
-        document.querySelector('#total-number').textContent= last(allTimeData.total)
-        document.querySelector('#dead-number').textContent= last(allTimeData.dead)
-        document.querySelector('#cured-number').textContent= last(allTimeData.cured)
-        document.querySelector('#positive-number').textContent= last(allTimeData.positive)
-
-        document.querySelector('#linear-equation').textContent= allTimeData.TF.linear.string
-        document.querySelector('#linear-r2').textContent= allTimeData.TF.linear.r2
-        document.querySelector('#power-equation').textContent= allTimeData.TF.power.string
-        document.querySelector('#power-r2').textContent= allTimeData.TF.power.r2
-        document.querySelector('#exponential-equation').textContent= allTimeData.TF.exponential.string
-        document.querySelector('#exponential-r2').textContent= allTimeData.TF.exponential.r2
-
-        document.querySelector('#restricted-linear-equation').textContent= restrictedData.TF.linear.string
-        document.querySelector('#restricted-linear-r2').textContent= restrictedData.TF.linear.r2
-        document.querySelector('#restricted-power-equation').textContent= restrictedData.TF.power.string
-        document.querySelector('#restricted-power-r2').textContent= restrictedData.TF.power.r2
-        document.querySelector('#restricted-exponential-equation').textContent= restrictedData.TF.exponential.string
-        document.querySelector('#restricted-exponential-r2').textContent= restrictedData.TF.exponential.r2
-        drawToday()
+        drawToday(allTimeData)
         drawDataEquations(dataEquationsCanvas, allTimeData)
         drawDataEquations(dataEquationsRestrictedCanvas, restrictedData)
-        //drawDataEquations(dataEquationsCanvas, allTimeData.total, allTimeData.totalForcastedLinear, allTimeData.totalForcastedPower, allTimeData.totalForcastedExponential,getLabels(allTimeData))
-        //drawDataEquations(dataEquationsRestrictedCanvas, restrictedData.total, restrictedData.totalForcastedLinear, restrictedData.totalForcastedPower, restrictedData.totalForcastedExponential, getLabels(restrictedData))
 
       })
+
+      fetchFile('/assets/data/dpc-covid19-ita-regioni.csv',function(data,error){
+        const REGIONS = new Set(CSV.csvToObject(data).map(e=>e.denominazione_regione))
+        REGIONS.forEach(function(r){
+          //<option value = "1">one</option>
+          const opt = document.createElement('option')
+          opt.innerHTML = r
+          opt.setAttribute('value',r)
+          document.querySelector('#regionsList').appendChild(opt)
+        })
+        //loadRegion(data,'Abruzzo')
+      })
+
 		};
 	</script>
 </body>
